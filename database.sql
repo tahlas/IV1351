@@ -1,3 +1,14 @@
+DROP TABLE IF EXISTS employee_planned_activity;
+DROP TABLE IF EXISTS planned_activity;
+DROP TABLE IF EXISTS employee_skill;
+DROP TABLE IF EXISTS skill;
+DROP TABLE IF EXISTS employee;
+DROP TABLE IF EXISTS job_title;
+DROP TABLE IF EXISTS department;
+DROP TABLE IF EXISTS person;
+DROP TABLE IF EXISTS course_instance;
+DROP TABLE IF EXISTS course_layout;
+DROP TABLE IF EXISTS teaching_activity;
 
 CREATE TABLE person(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -21,7 +32,7 @@ CREATE TABLE department(
 CREATE TABLE job_title(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    job_title VARCHAR(500) UNIQUE,
+    job_title VARCHAR(500) UNIQUE
 );
 
 CREATE TABLE employee(
@@ -43,7 +54,7 @@ CREATE TABLE employee(
 CREATE TABLE skill(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    skill_name VARCHAR(500),
+    skill_name VARCHAR(500)
 );
 
 CREATE TABLE employee_skill(
@@ -73,11 +84,11 @@ CREATE TABLE course_instance(
 );
 
 CREATE TABLE planned_activity(
-    PRIMARY KEY(teaching_activity_id, instance_id),
     teaching_activity_id INT,
-    instance_id VARCHAR(200) UNIQUE,
+    instance_id VARCHAR(200),
 
-    planned_hours INT
+    planned_hours INT,
+    PRIMARY KEY(teaching_activity_id, instance_id)
 );
 
 CREATE TABLE teaching_activity(
@@ -87,7 +98,7 @@ CREATE TABLE teaching_activity(
     factor FLOAT(5)
 );
 
-CREATE TABLE employee_planed_activity(
+CREATE TABLE employee_planned_activity(
     PRIMARY KEY (employee_id, teaching_activity_id, instance_id),
 
     employee_id INT,
