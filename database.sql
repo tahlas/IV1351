@@ -13,38 +13,39 @@ DROP TABLE IF EXISTS teaching_activity;
 CREATE TABLE person(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    personal_number VARCHAR(12) UNIQUE,
-    first_name VARCHAR(500),
-    last_name VARCHAR(500),
+    personal_number VARCHAR(12) UNIQUE NOT NULL,
+    first_name VARCHAR(500) NOT NULL,
+    last_name VARCHAR(500) NOT NULL,
     phone_number VARCHAR(500),
-    zip VARCHAR(500),
-    street VARCHAR(500),
-    city VARCHAR(500)
+    zip VARCHAR(500) NOT NULL,
+    street VARCHAR(500) NOT NULL,
+    city VARCHAR(500) NOT NULL
 );
 
 CREATE TABLE department(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    department_name VARCHAR(500),
-    manager VARCHAR(500) UNIQUE
+    department_name VARCHAR(500) UNIQUE NOT NULL,
+    manager VARCHAR(500) NOT NULL
 );
 
 CREATE TABLE job_title(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    job_title VARCHAR(500) UNIQUE
+    job_title VARCHAR(500) UNIQUE NOT NULL
 );
 
 CREATE TABLE employee(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    employment_id VARCHAR(500) UNIQUE,
-    salary INT,
+    employment_id VARCHAR(500) UNIQUE NOT NULL,
+    salary INT NOT NULL,
     manager VARCHAR(500),
 
-    department_id INT,
-    person_id INT,
-    job_title_id INT,
+    /* Primary keys are already unique*/
+    department_id INT NOT NULL,
+    person_id INT NOT NULL,
+    job_title_id INT NOT NULL,
 
     FOREIGN KEY (department_id) REFERENCES department(id),
     FOREIGN KEY (person_id) REFERENCES person(id),
@@ -54,12 +55,12 @@ CREATE TABLE employee(
 CREATE TABLE skill(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    skill_name VARCHAR(500)
+    skill_name VARCHAR(500) NOT NULL
 );
 
 CREATE TABLE employee_skill(
-    employee_id INT,
-    skill_id INT,
+    employee_id INT NOT NULL,
+    skill_id INT NOT NULL,
     PRIMARY KEY (employee_id, skill_id),
     FOREIGN KEY (employee_id) REFERENCES employee(id),
     FOREIGN KEY (skill_id) REFERENCES skill(id)   
@@ -67,41 +68,41 @@ CREATE TABLE employee_skill(
 
 CREATE TABLE course_layout(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    course_code VARCHAR(10) UNIQUE,
-    course_name VARCHAR(500),
+    course_code VARCHAR(10) UNIQUE NOT NULL,
+    course_name VARCHAR(500) NOT NULL,
     min_students INT,
     max_students INT,
-    hp FLOAT(5)
+    hp FLOAT(5) NOT NULL
 );
 
 CREATE TABLE course_instance(
     instance_id VARCHAR(200) UNIQUE PRIMARY KEY,
-    num_students INT,
-    course_layout_id INT,
+    num_students INT NOT NULL,
+    course_layout_id INT NOT NULL,
     Foreign Key (course_layout_id) REFERENCES course_layout(id),
-    study_period VARCHAR(10),
-    study_year TIMESTAMP(4)
+    study_period VARCHAR(10) NOT NULL,
+    study_year TIMESTAMP(4) NOT NULL
 );
 
 CREATE TABLE teaching_activity(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    activity_name VARCHAR(500) UNIQUE,
+    activity_name VARCHAR(500) UNIQUE NOT NULL,
     factor FLOAT(5)
 );
 
 CREATE TABLE planned_activity(
-    teaching_activity_id INT,
-    instance_id VARCHAR(200),
+    teaching_activity_id INT NOT NULL,
+    instance_id VARCHAR(200) NOT NULL,
 
-    planned_hours INT,
+    planned_hours INT NOT NULL,
     PRIMARY KEY(teaching_activity_id, instance_id)
 );
 
 CREATE TABLE employee_planned_activity(
-    employee_id INT,
-    teaching_activity_id INT,
-    instance_id VARCHAR(200),
+    employee_id INT NOT NULL,
+    teaching_activity_id INT NOT NULL,
+    instance_id VARCHAR(200) NOT NULL,
 
     PRIMARY KEY (employee_id, teaching_activity_id, instance_id),
     FOREIGN KEY (employee_id) REFERENCES employee(id),
