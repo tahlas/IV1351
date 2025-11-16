@@ -80,7 +80,14 @@ CREATE TABLE course_instance(
     course_layout_id INT,
     Foreign Key (course_layout_id) REFERENCES course_layout(id),
     study_period VARCHAR(10),
-    study_year TIMESTAMP(4),
+    study_year TIMESTAMP(4)
+);
+
+CREATE TABLE teaching_activity(
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    activity_name VARCHAR(500) UNIQUE,
+    factor FLOAT(5)
 );
 
 CREATE TABLE planned_activity(
@@ -91,20 +98,12 @@ CREATE TABLE planned_activity(
     PRIMARY KEY(teaching_activity_id, instance_id)
 );
 
-CREATE TABLE teaching_activity(
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
-    activity_name VARCHAR(500) UNIQUE,
-    factor FLOAT(5)
-);
-
 CREATE TABLE employee_planned_activity(
-    PRIMARY KEY (employee_id, teaching_activity_id, instance_id),
-
     employee_id INT,
     teaching_activity_id INT,
     instance_id VARCHAR(200),
 
+    PRIMARY KEY (employee_id, teaching_activity_id, instance_id),
     FOREIGN KEY (employee_id) REFERENCES employee(id),
     FOREIGN KEY (teaching_activity_id) REFERENCES teaching_activity(id),
     FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id)
