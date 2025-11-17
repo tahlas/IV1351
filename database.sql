@@ -74,7 +74,8 @@ CREATE TABLE course_layout(
     min_students INT,
     max_students INT,
     hp FLOAT(5) NOT NULL,
-    start_date DATE UNIQUE NOT NULL
+    start_date DATE UNIQUE NOT NULL,
+    end_date DATE UNIQUE NOT NULL
 );
 
 CREATE TABLE course_instance(
@@ -98,6 +99,9 @@ CREATE TABLE planned_activity(
     instance_id VARCHAR(200) NOT NULL,
 
     planned_hours INT NOT NULL,
+    examination_hours INT NOT NULL,
+    admin_hours INT NOT NULL,
+
     PRIMARY KEY (teaching_activity_id, instance_id),
     FOREIGN KEY (teaching_activity_id) REFERENCES teaching_activity(id) ON DELETE CASCADE,
     FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id) ON DELETE CASCADE

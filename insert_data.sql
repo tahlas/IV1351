@@ -28,16 +28,16 @@ VALUES
 (1, 3),
 (2, 2);
 
-INSERT INTO course_layout (course_code, course_name, min_students, max_students, hp, start_date)
+INSERT INTO course_layout (
+    course_code, course_name,
+    min_students, max_students, hp,
+    start_date, end_date
+)
 VALUES
-('CS101', 'Introduction to Programming', 10, 60, 7.5, '2024-01-15'),
-('CS102', 'Data Structures',            10, 50, 7.5, '2024-02-01'),
-('CS201', 'Algorithms',                  5, 40, 7.5, '2024-03-10'),
-('CS202', 'Operating Systems',           5, 45, 7.5, '2024-04-05'),
-('CS301', 'Database Systems',            5, 40, 7.5, '2024-05-20'),
-('CS302', 'Computer Networks',           5, 40, 7.5, '2024-06-10'),
-('CS303', 'Machine Learning',            5, 30, 10.0, '2024-07-01'),
-('CS304', 'Software Engineering',       10, 60, 7.5, '2024-08-15');
+('CS101', 'Intro to Programming', 10, 60, 7.5, '2024-01-10', '2024-03-10'),
+('CS201', 'Algorithms',            5, 40, 7.5, '2024-02-10', '2024-04-10'),
+('CS301', 'Databases',             5, 45, 7.5, '2024-03-10', '2024-05-10');
+
 
 INSERT INTO course_instance (instance_id, num_students, course_layout_id, study_period, study_year)
 VALUES
@@ -50,11 +50,15 @@ VALUES
 ('Seminar', 0.5),
 ('Lab', 0.7);
 
-INSERT INTO planned_activity (teaching_activity_id, instance_id, planned_hours)
-VALUES
-(1, 'CS101-2024-P1', 20),
-(2, 'CS101-2024-P1', 10),
-(3, 'CS201-2024-P2', 15);
+INSERT INTO planned_activity (
+    teaching_activity_id, instance_id,
+    planned_hours, examination_hours, admin_hours
+)
+VALUES 
+(1, 'CS101-2024-P1', 20, 4, 3),
+(2, 'CS101-2024-P1', 10, 2, 1),
+(3, 'CS201-2024-P2', 12, 0, 2);
+
 
 INSERT INTO employee_planned_activity (employee_id, teaching_activity_id, instance_id)
 VALUES
