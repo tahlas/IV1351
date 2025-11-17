@@ -55,3 +55,9 @@ VALUES
 (1, 1, 'CS101-2024-P1'),
 (2, 2, 'CS101-2024-P1'),
 (3, 3, 'CS201-2024-P2');
+
+INSERT INTO allocations (employee_id, instance_id, allocated_hours, max_num_allocations, num_allocations)
+VALUES
+(1, 'CS101-2024-P1', 10, 20, 1),
+(2, 'CS101-2024-P1', 8,  15, 1),
+(3, 'CS201-2024-P2', 12, 25, 2);

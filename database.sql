@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS person;
 DROP TABLE IF EXISTS course_instance;
 DROP TABLE IF EXISTS course_layout;
 DROP TABLE IF EXISTS teaching_activity;
+DROP TABLE IF EXISTS allocations;
 
 CREATE TABLE person(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -109,6 +110,19 @@ CREATE TABLE employee_planned_activity(
     PRIMARY KEY (employee_id, teaching_activity_id, instance_id),
     FOREIGN KEY (employee_id) REFERENCES employee(id) ON DELETE CASCADE,
     FOREIGN KEY (teaching_activity_id) REFERENCES teaching_activity(id) ON DELETE CASCADE,
+    FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id) ON DELETE CASCADE
+);
+
+CREATE TABLE allocations(
+    allocated_hours INT NOT NULL,
+    max_num_allocations INT NOT NULL,
+    num_allocations INT NOT NULL,
+
+    employee_id INT NOT NULL,
+    instance_id VARCHAR(200) NOT NULL,
+
+    PRIMARY KEY(employee_id, instance_id),
+    FOREIGN KEY (employee_id) REFERENCES employee(id) ON DELETE CASCADE,
     FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id) ON DELETE CASCADE
 );
 
