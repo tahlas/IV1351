@@ -73,7 +73,8 @@ CREATE TABLE course_layout(
     course_name VARCHAR(500) NOT NULL,
     min_students INT,
     max_students INT,
-    hp FLOAT(5) NOT NULL
+    hp FLOAT(5) NOT NULL,
+    start_date DATE UNIQUE NOT NULL
 );
 
 CREATE TABLE course_instance(
@@ -125,5 +126,3 @@ CREATE TABLE allocations(
     FOREIGN KEY (employee_id) REFERENCES employee(id) ON DELETE CASCADE,
     FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id) ON DELETE CASCADE
 );
-
-
