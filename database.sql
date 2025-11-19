@@ -17,7 +17,7 @@ CREATE TABLE person(
     personal_number VARCHAR(12) UNIQUE NOT NULL,
     first_name VARCHAR(500) NOT NULL,
     last_name VARCHAR(500) NOT NULL,
-    phone_number VARCHAR(500),
+    phone_number VARCHAR(500) NOT NULL,
     zip VARCHAR(500) NOT NULL,
     street VARCHAR(500) NOT NULL,
     city VARCHAR(500) NOT NULL
