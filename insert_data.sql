@@ -52,12 +52,12 @@ VALUES
 
 INSERT INTO planned_activity (
     teaching_activity_id, instance_id,
-    planned_hours, examination_hours, admin_hours
+    planned_hours
 )
 VALUES 
-(1, 'CS101-2024-P1', 20, 4, 3),
-(2, 'CS101-2024-P1', 10, 2, 1),
-(3, 'CS201-2024-P2', 12, 0, 2);
+(1, 'CS101-2024-P1', 20),
+(2, 'CS101-2024-P1', 10),
+(3, 'CS201-2024-P2', 12);
 
 
 INSERT INTO employee_planned_activity (employee_id, teaching_activity_id, instance_id)
