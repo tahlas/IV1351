@@ -69,7 +69,7 @@ CREATE TABLE employee_skill(
 
 CREATE TABLE course_layout(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    course_code VARCHAR(10) UNIQUE NOT NULL,
+    course_code VARCHAR(10) NOT NULL,
     course_name VARCHAR(500) NOT NULL,
     min_students INT,
     max_students INT,
