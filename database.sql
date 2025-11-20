@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS course_instance;
 DROP TABLE IF EXISTS course_layout;
 DROP TABLE IF EXISTS teaching_activity;
 DROP TABLE IF EXISTS allocations;
+DROP TABLE IF EXISTS salary;
 
 CREATE TABLE person(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -75,7 +76,7 @@ CREATE TABLE course_layout(
     max_students INT,
     hp FLOAT(5) NOT NULL,
     start_date DATE UNIQUE NOT NULL,
-    end_date DATE UNIQUE NOT NULL
+    end_date DATE UNIQUE
 );
 
 CREATE TABLE course_instance(
@@ -127,4 +128,16 @@ CREATE TABLE allocations(
     PRIMARY KEY(employee_id, instance_id),
     FOREIGN KEY (employee_id) REFERENCES employee(id),
     FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id)
+);
+
+CREATE TABLE salary(
+    employee_id INT NOT NULL,
+    salary INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+
+    PRIMARY KEY(salary, employee_id),
+    FOREIGN KEY (employee_id) REFERENCES employee(id)
+    
+
 );
