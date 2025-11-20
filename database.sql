@@ -111,9 +111,9 @@ CREATE TABLE employee_planned_activity(
     instance_id VARCHAR(200) NOT NULL,
 
     PRIMARY KEY (employee_id, teaching_activity_id, instance_id),
-    FOREIGN KEY (employee_id) REFERENCES employee(id) ON DELETE CASCADE,
-    FOREIGN KEY (teaching_activity_id) REFERENCES teaching_activity(id) ON DELETE CASCADE,
-    FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id) ON DELETE CASCADE
+    FOREIGN KEY (employee_id) REFERENCES employee(id),
+    FOREIGN KEY (teaching_activity_id) REFERENCES teaching_activity(id),
+    FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id)
 );
 
 CREATE TABLE allocations(
