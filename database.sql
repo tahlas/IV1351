@@ -48,9 +48,9 @@ CREATE TABLE employee(
     person_id INT NOT NULL,
     job_title_id INT NOT NULL,
 
-    FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE CASCADE,
-    FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE,
-    FOREIGN KEY (job_title_id) REFERENCES job_title(id) ON DELETE CASCADE
+    FOREIGN KEY (department_id) REFERENCES department(id),
+    FOREIGN KEY (person_id) REFERENCES person(id),
+    FOREIGN KEY (job_title_id) REFERENCES job_title(id)
 );
 
 CREATE TABLE skill(
@@ -82,7 +82,7 @@ CREATE TABLE course_instance(
     instance_id VARCHAR(200) UNIQUE PRIMARY KEY,
     num_students INT NOT NULL,
     course_layout_id INT NOT NULL,
-    FOREIGN KEY (course_layout_id) REFERENCES course_layout(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_layout_id) REFERENCES course_layout(id),
     study_period VARCHAR(10) NOT NULL,
     study_year TIMESTAMP(4) NOT NULL
 );
@@ -101,8 +101,8 @@ CREATE TABLE planned_activity(
     planned_hours INT NOT NULL,
 
     PRIMARY KEY (teaching_activity_id, instance_id),
-    FOREIGN KEY (teaching_activity_id) REFERENCES teaching_activity(id) ON DELETE CASCADE,
-    FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id) ON DELETE CASCADE
+    FOREIGN KEY (teaching_activity_id) REFERENCES teaching_activity(id),
+    FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id)
 );
 
 CREATE TABLE employee_planned_activity(
@@ -125,6 +125,6 @@ CREATE TABLE allocations(
     instance_id VARCHAR(200) NOT NULL,
 
     PRIMARY KEY(employee_id, instance_id),
-    FOREIGN KEY (employee_id) REFERENCES employee(id) ON DELETE CASCADE,
-    FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id) ON DELETE CASCADE
+    FOREIGN KEY (employee_id) REFERENCES employee(id),
+    FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id)
 );
