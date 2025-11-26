@@ -47,8 +47,8 @@ VALUES
 INSERT INTO teaching_activity (activity_name, factor)
 VALUES
 ('Lecture', 1.0),
-('Seminar', 0.5),
-('Lab', 0.7);
+('Seminar', 2),
+('Lab', 3);
 
 INSERT INTO planned_activity (
     teaching_activity_id, instance_id,
