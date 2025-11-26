@@ -138,6 +138,4 @@ CREATE TABLE salary(
 
     PRIMARY KEY(salary, employee_id),
     FOREIGN KEY (employee_id) REFERENCES employee(id)
-    
-
 );
