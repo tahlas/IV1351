@@ -41,7 +41,7 @@ VALUES
 
 INSERT INTO course_instance (instance_id, num_students, course_layout_id, study_period, study_year)
 VALUES
-('CS101-2024-P1', 45, 1, 'P1', '2024-01-01'),
+('CS101-2024-P1', 45, 1, 'P1', '2025-01-01'),
 ('CS201-2024-P2', 30, 2, 'P2', '2024-01-01');
 
 INSERT INTO teaching_activity (activity_name, factor)
