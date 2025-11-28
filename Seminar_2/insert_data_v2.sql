@@ -1,3 +1,4 @@
+
 INSERT INTO department (department_name, manager)
 VALUES
 ('Computer Science', 'mgr1'),
@@ -36,19 +37,24 @@ INSERT INTO course_layout (
 VALUES
 ('CS101', 'Intro to Programming', 10, 60, 7.5, '2024-01-10', '2024-03-10'),
 ('CS201', 'Algorithms',            5, 40, 7.5, '2024-02-10', '2024-04-10'),
-('CS301', 'Databases',             5, 45, 7.5, '2024-03-10', '2024-05-10');
-
+('CS301', 'Databases',             5, 45, 7.5, '2024-03-10', '2024-05-10'),
+('CS401', 'Machine Learning',      5, 35, 7.5, '2024-04-10', '2024-06-10'),
+('MATH101', 'Calculus I',         10, 50, 7.5, '2024-01-15', '2024-03-15');
 
 INSERT INTO course_instance (instance_id, num_students, course_layout_id, study_period, study_year)
 VALUES
 ('CS101-2025-P1', 45, 1, 'P1', '2025-01-01'),
+('CS201-2025-P2', 30, 2, 'P2', '2025-01-01'),
+('CS301-2025-P3', 38, 3, 'P3', '2025-01-01'),
+('CS401-2025-P4', 25, 4, 'P4', '2025-01-01'),
+('MATH101-2025-P1', 52, 5, 'P1', '2025-01-01'),
 ('CS201-2024-P2', 30, 2, 'P2', '2024-01-01');
 
 INSERT INTO teaching_activity (activity_name, factor)
 VALUES
 ('Lecture', 1.0),
-('Seminar', 2),
-('Lab', 3);
+('Seminar', 2.0),
+('Lab', 3.0);
 
 INSERT INTO planned_activity (
     teaching_activity_id, instance_id,
@@ -57,35 +63,55 @@ INSERT INTO planned_activity (
 VALUES 
 (1, 'CS101-2025-P1', 20),
 (2, 'CS101-2025-P1', 10),
+(3, 'CS101-2025-P1', 15),
+(1, 'CS201-2025-P2', 24),
+(3, 'CS201-2025-P2', 18),
+(1, 'CS301-2025-P3', 20),
+(2, 'CS301-2025-P3', 12),
+(3, 'CS301-2025-P3', 20),
+(1, 'CS401-2025-P4', 18),
+(3, 'CS401-2025-P4', 25),
+(1, 'MATH101-2025-P1', 30),
+(2, 'MATH101-2025-P1', 15),
 (3, 'CS201-2024-P2', 12);
-
 
 INSERT INTO employee_planned_activity (employee_id, teaching_activity_id, instance_id)
 VALUES
 (1, 1, 'CS101-2025-P1'),
+(1, 1, 'CS201-2025-P2'),
+(1, 1, 'CS401-2025-P4'),
 (2, 2, 'CS101-2025-P1'),
-(3, 3, 'CS201-2024-P2');
+(2, 3, 'CS201-2025-P2'),
+(2, 1, 'CS301-2025-P3'),
+(3, 3, 'CS101-2025-P1'),
+(3, 2, 'CS301-2025-P3'),
+(3, 3, 'CS301-2025-P3'),
+(3, 3, 'CS201-2024-P2'),
+(1, 1, 'MATH101-2025-P1'),
+(3, 2, 'MATH101-2025-P1');
 
 INSERT INTO allocations (employee_id, instance_id, allocated_hours, max_num_allocations, num_allocations)
 VALUES
-(1, 'CS101-2025-P1', 10, 20, 1),
-(2, 'CS101-2025-P1', 8,  15, 1),
-(3, 'CS201-2024-P2', 12, 25, 2);
+(1, 'CS101-2025-P1', 20, 30, 1),
+(1, 'CS201-2025-P2', 24, 30, 1),
+(1, 'CS401-2025-P4', 18, 30, 1),
+(1, 'MATH101-2025-P1', 30, 30, 1),
+(2, 'CS101-2025-P1', 10, 25, 1),
+(2, 'CS201-2025-P2', 18, 25, 1),
+(2, 'CS301-2025-P3', 20, 25, 1),
+(3, 'CS101-2025-P1', 15, 20, 1),
+(3, 'CS301-2025-P3', 32, 20, 2),
+(3, 'CS201-2024-P2', 12, 20, 1),
+(3, 'MATH101-2025-P1', 15, 20, 1);
 
 INSERT INTO salary (employee_id, salary, start_date, end_date)
 VALUES
--- Alice (employee 1)
 (1, 45000, '2022-01-01', '2023-01-01'),
 (1, 47000, '2023-01-02', '2024-01-01'),
 (1, 50000, '2024-01-02', '2025-01-01'),
-
--- Bob (employee 2)
 (2, 38000, '2022-01-01', '2023-01-01'),
 (2, 40000, '2023-01-02', '2024-01-01'),
 (2, 42000, '2024-01-02', '2025-01-01'),
-
--- Carol (employee 3)
 (3, 30000, '2022-01-01', '2023-01-01'),
 (3, 32000, '2023-01-02', '2024-01-01'),
 (3, 35000, '2024-01-02', '2025-01-01');
-
