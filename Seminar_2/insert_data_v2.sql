@@ -41,7 +41,7 @@ VALUES
 
 INSERT INTO course_instance (instance_id, num_students, course_layout_id, study_period, study_year)
 VALUES
-('CS101-2024-P1', 45, 1, 'P1', '2025-01-01'),
+('CS101-2025-P1', 45, 1, 'P1', '2025-01-01'),
 ('CS201-2024-P2', 30, 2, 'P2', '2024-01-01');
 
 INSERT INTO teaching_activity (activity_name, factor)
@@ -55,21 +55,21 @@ INSERT INTO planned_activity (
     planned_hours
 )
 VALUES 
-(1, 'CS101-2024-P1', 20),
-(2, 'CS101-2024-P1', 10),
+(1, 'CS101-2025-P1', 20),
+(2, 'CS101-2025-P1', 10),
 (3, 'CS201-2024-P2', 12);
 
 
 INSERT INTO employee_planned_activity (employee_id, teaching_activity_id, instance_id)
 VALUES
-(1, 1, 'CS101-2024-P1'),
-(2, 2, 'CS101-2024-P1'),
+(1, 1, 'CS101-2025-P1'),
+(2, 2, 'CS101-2025-P1'),
 (3, 3, 'CS201-2024-P2');
 
 INSERT INTO allocations (employee_id, instance_id, allocated_hours, max_num_allocations, num_allocations)
 VALUES
-(1, 'CS101-2024-P1', 10, 20, 1),
-(2, 'CS101-2024-P1', 8,  15, 1),
+(1, 'CS101-2025-P1', 10, 20, 1),
+(2, 'CS101-2025-P1', 8,  15, 1),
 (3, 'CS201-2024-P2', 12, 25, 2);
 
 INSERT INTO salary (employee_id, salary, start_date, end_date)
