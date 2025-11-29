@@ -51,13 +51,13 @@ GROUP BY course_instance.instance_id,
 
 -- QUERY 2
 SELECT course_code, course_instance.instance_id, hp, first_name, last_name, job_title,  
- COALESCE(SUM(planned_hours  * factor)   FILTER (WHERE activity_name = 'Lecture'),0) as Lecture_Hours,
+COALESCE(SUM(planned_hours  * factor)   FILTER (WHERE activity_name = 'Lecture'),0) as Lecture_Hours,
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Tutorial'),0) as Tutorial_Hours,
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lab'),0) as Lab_Hours,
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Seminar'),0) as Seminar_Hours,
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Exam'),0) as Exam_Hours,
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Admin'),0) as Admin_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name NOT IN ('Lecture', 'Tutorial', 'Lab', 'Seminar')),0) as Other,
+COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name NOT IN ('Lecture', 'Tutorial', 'Lab', 'Seminar', 'Exam', 'Admin')),0) as Other,
 COALESCE(SUM(planned_hours * factor),0 ) as Total
 FROM course_instance 
 INNER JOIN course_layout ON course_instance.course_layout_id = course_layout.id 
@@ -85,7 +85,7 @@ COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lab'),0) as 
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Seminar'),0) as Seminar_Hours,
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Exam'),0) as Exam_Hours,
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Admin'),0) as Admin_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name NOT IN ('Lecture', 'Tutorial', 'Lab', 'Seminar')),0) as Other,
+COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name NOT IN ('Lecture', 'Tutorial', 'Lab', 'Seminar', 'Exam', 'Admin')),0) as Other,
 COALESCE(SUM(planned_hours * factor),0 ) as Total
 FROM course_instance 
 INNER JOIN course_layout ON course_instance.course_layout_id = course_layout.id 
