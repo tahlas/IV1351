@@ -108,7 +108,7 @@ num_students;
 
 -- QUERY 4
 SELECT employment_id, first_name, last_name, study_period,
-SUM(num_allocations)  as allocations
+COUNT (*) as allocations
 FROM allocations INNER JOIN employee ON allocations.employee_id = employee.id
 INNER JOIN person ON person.id = employee.person_id
 INNER JOIN course_instance ON allocations.instance_id = course_instance.instance_id

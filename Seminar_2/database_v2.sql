@@ -118,14 +118,14 @@ CREATE TABLE employee_planned_activity(
 );
 
 CREATE TABLE allocations(
-    allocated_hours INT NOT NULL,
-    max_num_allocations INT NOT NULL,
-    num_allocations INT NOT NULL,
+    -- allocated_hours INT NOT NULL,
+    -- max_num_allocations INT NOT NULL,
+    -- num_allocations INT NOT NULL,
 
     employee_id INT NOT NULL,
     instance_id VARCHAR(200) NOT NULL,
 
-    PRIMARY KEY(employee_id, instance_id),
+    PRIMARY KEY (employee_id, instance_id),
     FOREIGN KEY (employee_id) REFERENCES employee(id),
     FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id)
 );
@@ -140,3 +140,7 @@ CREATE TABLE salary(
     FOREIGN KEY (employee_id) REFERENCES employee(id)
 );
 
+CREATE TABLE business_rule(
+    max_num_allocations INT NOT NULL,
+    PRIMARY KEY(max_num_allocations)
+);
