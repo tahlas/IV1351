@@ -1,30 +1,27 @@
  -- QUERY 1
+-- DROP VIEW teacher_hours;
+-- DROP VIEW course_information;
+-- CREATE VIEW teacher_hours AS
+-- SELECT instance_id, 
+-- COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lecture'),0) as Lecture_Hours,
+-- COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Tutorial'),0) as Tutorial_Hours,
+-- COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lab'),0) as Lab_Hours,
+-- COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Seminar'),0) as Seminar_Hours,
+-- COALESCE(SUM(planned_hours * factor),0) as Total,
+-- COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name NOT IN ('Lecture', 'Tutorial', 'Lab', 'Seminar')),0) as Other
+-- FROM planned_activity
+-- FULL OUTER JOIN teaching_activity ON planned_activity.teaching_activity_id = teaching_activity.id
+-- GROUP BY instance_id;
 
-DROP VIEW teacher_hours;
-DROP VIEW course_information;
-CREATE VIEW teacher_hours AS
-SELECT instance_id, 
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lecture'),0) as Lecture_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Tutorial'),0) as Tutorial_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lab'),0) as Lab_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Seminar'),0) as Seminar_Hours,
-COALESCE(SUM(planned_hours * factor),0) as Total,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name NOT IN ('Lecture', 'Tutorial', 'Lab', 'Seminar')),0) as Other
-FROM planned_activity
-FULL OUTER JOIN teaching_activity ON planned_activity.teaching_activity_id = teaching_activity.id
-GROUP BY instance_id;
+-- CREATE VIEW course_information AS SELECT instance_id, course_code, hp, study_period, num_students
+-- , (32+0.725*num_students) AS exam, (2*hp+28+0.2*num_students) 
+-- AS admin, (2*hp+28+0.2*num_students+32+0.725*num_students) AS totalAdminExam 
+-- FROM course_layout RIGHT OUTER JOIN course_instance  ON course_layout.id = course_instance.course_layout_id 
+-- WHERE EXTRACT(YEAR FROM course_instance.study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
 
-CREATE VIEW course_information AS SELECT instance_id, course_code, hp, study_period, num_students
-, (32+0.725*num_students) AS exam, (2*hp+28+0.2*num_students) 
-AS admin, (2*hp+28+0.2*num_students+32+0.725*num_students) AS totalAdminExam 
-FROM course_layout RIGHT OUTER JOIN course_instance  ON course_layout.id = course_instance.course_layout_id 
-WHERE EXTRACT(YEAR FROM course_instance.study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
-
-SELECT instance_id, course_code, hp, study_period, num_students, exam, admin, lecture_hours, tutorial_hours, lab_hours, seminar_hours,  (total + totalAdminExam) AS total, other
-FROM course_information
-LEFT OUTER JOIN teacher_hours USING(instance_id);
-
-
+-- SELECT instance_id, course_code, hp, study_period, num_students, exam, admin, lecture_hours, tutorial_hours, lab_hours, seminar_hours,  (total + totalAdminExam) AS total, other
+-- FROM course_information
+-- LEFT OUTER JOIN teacher_hours USING(instance_id);
 
  -- QUERY 1 updated
 SELECT course_instance.instance_id, course_code, hp, study_period, num_students,
@@ -44,10 +41,8 @@ WHERE EXTRACT(YEAR FROM course_instance.study_year) = EXTRACT(YEAR FROM CURRENT_
 GROUP BY course_instance.instance_id,
  course_code, 
  hp,
-  study_period, 
-  num_students;
-
-
+ study_period, 
+ num_students;
 
 -- QUERY 2
 SELECT course_code, course_instance.instance_id, hp, first_name, last_name, job_title,  
