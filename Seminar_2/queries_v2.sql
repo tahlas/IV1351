@@ -35,7 +35,7 @@ COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Seminar'),0)
 (32+0.725*num_students) AS exam,
  (2*hp+28+0.2*num_students) AS admin,
  COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name NOT IN ('Lecture', 'Tutorial', 'Lab', 'Seminar')),0) as Other,
-COALESCE(SUM(planned_hours * factor),0) as Total
+COALESCE(SUM(planned_hours * factor ) +(32+0.725*num_students) +  (2*hp+28+0.2*num_students)  ,0) as Total
 FROM course_instance 
 INNER JOIN course_layout ON course_instance.course_layout_id = course_layout.id 
 INNER JOIN planned_activity ON planned_activity.instance_id = course_instance.instance_id 
