@@ -12,18 +12,6 @@ DROP TABLE IF EXISTS teaching_activity CASCADE;
 DROP TABLE IF EXISTS allocations CASCADE;
 DROP TABLE IF EXISTS salary CASCADE;
 
-DROP TYPE IF EXISTS period_enum CASCADE; 
-
-CREATE TYPE period_enum AS ENUM (
-    'P1',
-    'P2',
-     'P3',
-     'P4',
-    'P1-P2',
-    'P2-P3',
-    'P3-P4'
-);
-
 CREATE TABLE person(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
@@ -59,7 +47,6 @@ CREATE TABLE employee(
     /* Primary keys are already unique*/
     department_id INT NOT NULL,
     person_id INT NOT NULL,
-
     job_title_id INT NOT NULL,
 
     FOREIGN KEY (department_id) REFERENCES department(id),
@@ -97,7 +84,7 @@ CREATE TABLE course_instance(
     num_students INT NOT NULL,
     course_layout_id INT NOT NULL,
     FOREIGN KEY (course_layout_id) REFERENCES course_layout(id),
-    study_period period_enum NOT NULL, 
+    study_period VARCHAR(10) NOT NULL,
     study_year TIMESTAMP(4) NOT NULL
 );
 
