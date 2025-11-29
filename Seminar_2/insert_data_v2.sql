@@ -1,4 +1,3 @@
-
 INSERT INTO department (department_name, manager)
 VALUES
 ('Computer Science', 'mgr1'),
@@ -54,7 +53,9 @@ INSERT INTO teaching_activity (activity_name, factor)
 VALUES
 ('Lecture', 1.0),
 ('Seminar', 2.0),
-('Lab', 3.0);
+('Lab', 3.0),
+('Exam', 1.0),
+('Admin', 1.0);
 
 INSERT INTO planned_activity (
     teaching_activity_id, instance_id,
@@ -64,31 +65,55 @@ VALUES
 (1, 'CS101-2025-P1', 20),
 (2, 'CS101-2025-P1', 10),
 (3, 'CS101-2025-P1', 15),
+(4, 'CS101-2025-P1', 64.625),
+(5, 'CS101-2025-P1', 52),
 (1, 'CS201-2025-P2', 24),
 (3, 'CS201-2025-P2', 18),
+(4, 'CS201-2025-P2', 53.75),
+(5, 'CS201-2025-P2', 49),
 (1, 'CS301-2025-P3', 20),
 (2, 'CS301-2025-P3', 12),
 (3, 'CS301-2025-P3', 20),
+(4, 'CS301-2025-P3', 59.55),
+(5, 'CS301-2025-P3', 50.6),
 (1, 'CS401-2025-P4', 18),
 (3, 'CS401-2025-P4', 25),
+(4, 'CS401-2025-P4', 50.125),
+(5, 'CS401-2025-P4', 48),
 (1, 'MATH101-2025-P1', 30),
 (2, 'MATH101-2025-P1', 15),
-(3, 'CS201-2024-P2', 12);
+(4, 'MATH101-2025-P1', 69.7),
+(5, 'MATH101-2025-P1', 53.4),
+(3, 'CS201-2024-P2', 12),
+(4, 'CS201-2024-P2', 53.75),
+(5, 'CS201-2024-P2', 49);
 
 INSERT INTO employee_planned_activity (employee_id, teaching_activity_id, instance_id)
 VALUES
 (1, 1, 'CS101-2025-P1'),
-(1, 1, 'CS201-2025-P2'),
-(1, 1, 'CS401-2025-P4'),
 (2, 2, 'CS101-2025-P1'),
-(2, 3, 'CS201-2025-P2'),
-(2, 1, 'CS301-2025-P3'),
 (3, 3, 'CS101-2025-P1'),
+(1, 4, 'CS101-2025-P1'),
+(1, 5, 'CS101-2025-P1'),
+(1, 1, 'CS201-2025-P2'),
+(2, 3, 'CS201-2025-P2'),
+(1, 4, 'CS201-2025-P2'),
+(2, 5, 'CS201-2025-P2'),
+(2, 1, 'CS301-2025-P3'),
 (3, 2, 'CS301-2025-P3'),
 (3, 3, 'CS301-2025-P3'),
-(3, 3, 'CS201-2024-P2'),
+(2, 4, 'CS301-2025-P3'),
+(3, 5, 'CS301-2025-P3'),
+(1, 1, 'CS401-2025-P4'),
+(1, 4, 'CS401-2025-P4'),
+(1, 5, 'CS401-2025-P4'),
 (1, 1, 'MATH101-2025-P1'),
-(3, 2, 'MATH101-2025-P1');
+(3, 2, 'MATH101-2025-P1'),
+(1, 4, 'MATH101-2025-P1'),
+(3, 5, 'MATH101-2025-P1'),
+(3, 3, 'CS201-2024-P2'),
+(3, 4, 'CS201-2024-P2'),
+(3, 5, 'CS201-2024-P2');
 
 INSERT INTO allocations (employee_id, instance_id, allocated_hours, max_num_allocations, num_allocations)
 VALUES
