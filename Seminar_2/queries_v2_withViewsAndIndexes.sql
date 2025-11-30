@@ -1,5 +1,5 @@
 -- VIEW FOR QUERY 1
-DROP VIEW  v_course_hours;
+DROP VIEW v_course_hours;
 CREATE VIEW v_course_hours AS
 SELECT course_instance.instance_id, course_code, hp, study_period, num_students,study_year,
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lecture' ), 0) as Lecture_Hours,
@@ -25,8 +25,8 @@ FROM v_course_hours
 WHERE EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
 
 -- VIEW FOR QUERY 2 AND 3
-DROP VIEW  v_teaching_hours;
-CREATE VIEW v_teaching_hours AS
+DROP  MATERIALIZED  VIEW  v_teaching_hours;
+CREATE MATERIALIZED  VIEW v_teaching_hours AS
 SELECT course_code, course_instance.instance_id, hp, study_period, first_name, last_name, job_title, study_year, 
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lecture' ), 0) as Lecture_Hours,
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Tutorial'), 0) as Tutorial_Hours,
@@ -54,20 +54,26 @@ last_name,
 job_title;
 
 -- QUERY 2
+
+DROP INDEX  idx_course_study_year;
+
+CREATE INDEX idx_course_study_year ON v_teaching_hours(course_code, EXTRACT(YEAR FROM study_year) ) ;
+
 SELECT course_code, instance_id , hp, first_name, last_name, job_title, Lecture_Hours, Tutorial_Hours,Lab_Hours,Seminar_Hours,Exam_Hours,Admin_Hours, Other,Total
 FROM v_teaching_hours
 WHERE course_code = 'CS101' AND EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
 
 -- QUERY 3
-SELECT course_code, instance_id , hp, study_period, first_name, last_name, job_title, Lecture_Hours, Tutorial_Hours,Lab_Hours,Seminar_Hours,Exam_Hours,Admin_Hours, Other,Total
+
+DROP INDEX  idx_teacher_study_period;
+
+CREATE INDEX idx_teacher_study_period ON v_teaching_hours( EXTRACT(YEAR FROM study_year) ,   (first_name || ' ' || last_name)) ;
+
+ SELECT course_code, instance_id , hp, first_name, last_name, job_title, Lecture_Hours, Tutorial_Hours,Lab_Hours,Seminar_Hours,Exam_Hours,Admin_Hours, Other,Total
 FROM v_teaching_hours
-WHERE EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE) 
-      AND CONCAT(first_name, ' ', last_name) = 'Bob Smith';
+WHERE course_code = 'CS101' AND EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
 
 -- QUERY 4
--- DROP INDEX IF EXISTS course_instance_study_year_idx;
--- CREATE INDEX course_instance_study_year_idx ON course_instance (study_year);
-
 SELECT employment_id, first_name, last_name, study_period,
 COUNT (*) as allocations
 FROM allocations INNER JOIN employee ON allocations.employee_id = employee.id
@@ -80,3 +86,39 @@ employment_id,
 first_name,
 last_name,
 study_period;
+
+-- Only for the mandatory part
+-- Course instances with total planned hours vs total allocated hours variance >15% 
+WITH planned AS (
+      -- Sums the total planned hours for each course instance
+      SELECT
+            instance_id,
+            SUM(total) AS planned_hours -- Gets total planned hours from the view
+      FROM v_course_hours 
+      GROUP BY instance_id
+),
+allocated AS (
+      SELECT
+            instance_id,
+            SUM(total) as allocated_hours -- Gets the total allocated hours from the view 
+      FROM v_teaching_hours
+      GROUP BY instance_id
+)
+
+SELECT
+      p.instance_id,
+      p.planned_hours,
+      COALESCE(a.allocated_hours, 0) as allocated_hours,
+      ROUND(
+            CAST(
+                  ABS(COALESCE(a.allocated_hours, 0) - p.planned_hours)
+                  / NULLIF(p.planned_hours, 0) * 100 
+            AS numeric), 
+            2
+      ) AS variance_percentage
+FROM planned p 
+LEFT JOIN allocated a on p.instance_id = a.instance_id
+WHERE
+      ABS(COALESCE(a.allocated_hours, 0) - p.planned_hours)
+      / NULLIF(p.planned_hours, 0) > 0.15
+ORDER BY variance_percentage DESC;

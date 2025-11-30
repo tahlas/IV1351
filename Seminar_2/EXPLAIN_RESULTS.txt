@@ -1,0 +1,131 @@
+-- QUERY 1
+  -- BEFORE OPTIMIZATION
+ Subquery Scan on v_course_hours  (cost=4.69..5.19 rows=3 width=119)
+   ->  GroupAggregate  (cost=4.69..5.16 rows=3 width=127)
+         Group Key: course_instance.instance_id, course_layout.course_code, course_layout.hp
+         ->  Sort  (cost=4.69..4.70 rows=4 width=45)
+               Sort Key: course_instance.instance_id, course_layout.course_code, course_layout.hp
+               ->  Hash Join  (cost=3.32..4.65 rows=4 width=45)
+                     Hash Cond: (planned_activity.teaching_activity_id = teaching_activity.id)
+                     ->  Hash Join  (cost=2.18..3.50 rows=4 width=39)
+                           Hash Cond: ((planned_activity.instance_id)::text = (course_instance.instance_id)::text)
+                           ->  Seq Scan on planned_activity  (cost=0.00..1.20 rows=20 width=22)
+                           ->  Hash  (cost=2.17..2.17 rows=1 width=31)
+                                 ->  Nested Loop  (cost=0.00..2.17 rows=1 width=31)
+                                       Join Filter: (course_layout.id = course_instance.course_layout_id)
+                                       ->  Seq Scan on course_instance  (cost=0.00..1.10 rows=1 width=25)
+                                             Filter: (EXTRACT(year FROM study_year) = EXTRACT(year FROM CURRENT_DATE))
+                                       ->  Seq Scan on course_layout  (cost=0.00..1.03 rows=3 width=14)
+                     ->  Hash  (cost=1.06..1.06 rows=6 width=14)
+                           ->  Seq Scan on teaching_activity  (cost=0.00..1.06 rows=6 width=14)
+                           
+                        
+
+
+
+-- QUERY 2
+  -- BEFORE OPTIMIZATION
+Subquery Scan on v_teaching_hours  (cost=9.44..9.79 rows=3 width=113)
+   ->  GroupAggregate  (cost=9.44..9.76 rows=3 width=124)
+         Group Key: course_instance.instance_id, course_layout.hp, person.first_name, person.last_name, job_title.job_title
+         ->  Sort  (cost=9.44..9.44 rows=3 width=66)
+               Sort Key: course_instance.instance_id, course_layout.hp, person.first_name, person.last_name, job_title.job_title
+               ->  Nested Loop  (cost=5.74..9.41 rows=3 width=66)
+                     Join Filter: (employee_planned_activity.employee_id = employee.id)
+                     ->  Hash Join  (cost=3.60..6.07 rows=3 width=45)
+                           Hash Cond: (planned_activity.teaching_activity_id = teaching_activity.id)
+                           ->  Nested Loop  (cost=2.47..4.92 rows=3 width=43)
+                                 Join Filter: (course_layout.id = course_instance.course_layout_id)
+                                 ->  Seq Scan on course_layout  (cost=0.00..1.04 rows=1 width=14)
+                                       Filter: ((course_code)::text = 'CS101'::text)
+                                 ->  Hash Join  (cost=2.47..3.85 rows=3 width=37)
+                                       Hash Cond: (((employee_planned_activity.instance_id)::text = (planned_activity.instance_id)::text) AND (employee_planned_activity.teaching_activity_id = planned_activity.teaching_activity_id))
+                                       ->  Seq Scan on employee_planned_activity  (cost=0.00..1.20 rows=20 width=22)
+                                       ->  Hash  (cost=2.41..2.41 rows=4 width=43)
+                                             ->  Hash Join  (cost=1.11..2.41 rows=4 width=43)
+                                                   Hash Cond: ((planned_activity.instance_id)::text = (course_instance.instance_id)::text)
+                                                   ->  Seq Scan on planned_activity  (cost=0.00..1.20 rows=20 width=22)
+                                                   ->  Hash  (cost=1.10..1.10 rows=1 width=21)
+                                                         ->  Seq Scan on course_instance  (cost=0.00..1.10 rows=1 width=21)
+                                                               Filter: (EXTRACT(year FROM study_year) = EXTRACT(year FROM CURRENT_DATE))
+                           ->  Hash  (cost=1.06..1.06 rows=6 width=14)
+                                 ->  Seq Scan on teaching_activity  (cost=0.00..1.06 rows=6 width=14)
+                     ->  Materialize  (cost=2.14..3.22 rows=3 width=29)
+                           ->  Hash Join  (cost=2.14..3.20 rows=3 width=29)
+                                 Hash Cond: (employee.job_title_id = job_title.id)
+                                 ->  Hash Join  (cost=1.07..2.12 rows=3 width=21)
+                                       Hash Cond: (employee.person_id = person.id)
+                                       ->  Seq Scan on employee  (cost=0.00..1.03 rows=3 width=12)
+                                       ->  Hash  (cost=1.03..1.03 rows=3 width=17)
+                                             ->  Seq Scan on person  (cost=0.00..1.03 rows=3 width=17)
+ ->  Hash  (cost=1.03..1.03 rows=3 width=16)
+                                       ->  Seq Scan on job_title  (cost=0.00..1.03 rows=3 width=16)
+
+                                       
+-- AFTER OPTIMIZATION (Materialized view and index on study_year and course_code)
+       Seq Scan on v_teaching_hours  (cost=0.00..1.23 rows=4 width=112)
+   Filter: (((course_code)::text = 'CS101'::text) AND (EXTRACT(year FROM study_year) = EXTRACT(year FROM CURRENT_DATE)))
+(2 rows)
+
+
+-- QUERY 3
+  -- BEFORE OPTIMIZATION
+ Subquery Scan on v_teaching_hours  (cost=8.25..8.37 rows=1 width=116)
+   ->  GroupAggregate  (cost=8.25..8.36 rows=1 width=124)
+         Group Key: course_layout.course_code, course_instance.instance_id, course_layout.hp, person.first_name, person.last_name, job_title.job_title
+         ->  Sort  (cost=8.25..8.25 rows=1 width=66)
+               Sort Key: course_layout.course_code, course_instance.instance_id, course_layout.hp, person.first_name, person.last_name, job_title.job_title
+               ->  Nested Loop  (cost=1.38..8.24 rows=1 width=66)
+                     Join Filter: (job_title.id = employee.job_title_id)
+                     ->  Nested Loop  (cost=1.38..7.17 rows=1 width=58)
+                           Join Filter: (planned_activity.teaching_activity_id = teaching_activity.id)
+                           ->  Nested Loop  (cost=1.25..6.41 rows=1 width=56)
+                                 Join Filter: ((course_instance.instance_id)::text = (planned_activity.instance_id)::text)
+                                 ->  Nested Loop  (cost=1.11..5.64 rows=1 width=62)
+                                       Join Filter: (course_layout.id = course_instance.course_layout_id)
+                                       ->  Nested Loop  (cost=1.11..4.57 rows=1 width=56)
+                                             Join Filter: (employee_planned_activity.employee_id = employee.id)
+                                             ->  Nested Loop  (cost=0.00..2.11 rows=1 width=21)
+                                                   Join Filter: (person.id = employee.person_id)
+                                                   ->  Seq Scan on person  (cost=0.00..1.04 rows=1 width=17)
+                                                         Filter: (concat(first_name, ' ', last_name) = 'Bob Smith'::text)
+                                                   ->  Seq Scan on employee  (cost=0.00..1.03 rows=3 width=12)
+                                             ->  Hash Join  (cost=1.11..2.41 rows=4 width=43)
+                                                   Hash Cond: ((employee_planned_activity.instance_id)::text = (course_instance.instance_id)::text)
+                                                   ->  Seq Scan on employee_planned_activity  (cost=0.00..1.20 rows=20 width=22)
+                                                   ->  Hash  (cost=1.10..1.10 rows=1 width=21)
+                                                         ->  Seq Scan on course_instance  (cost=0.00..1.10 rows=1 width=21)
+                                                               Filter: (EXTRACT(year FROM study_year) = EXTRACT(year FROM CURRENT_DATE))
+                                       ->  Seq Scan on course_layout  (cost=0.00..1.03 rows=3 width=14)
+                                 ->  Index Scan using planned_activity_pkey on planned_activity  (cost=0.14..0.76 rows=1 width=22)
+                                       Index Cond: ((teaching_activity_id = employee_planned_activity.teaching_activity_id) AND ((instance_id)::text = (employee_planned_activity.instance_id)::text))
+                           ->  Index Scan using teaching_activity_pkey on teaching_activity  (cost=0.13..0.75 rows=1 width=14)
+                                 Index Cond: (id = employee_planned_activity.teaching_activity_id)
+                     ->  Seq Scan on job_title  (cost=0.00..1.03 rows=3 width=16)
+                     
+                     
+                  -- AFTER OPTIMIZATION (Materialized view and index on study_year and (first_name last_name))   
+                     Seq Scan on v_teaching_hours  (cost=0.00..1.27 rows=1 width=115)
+   Filter: (((((first_name)::text || ' '::text) || (last_name)::text) = 'Bob Smith'::text) AND (EXTRACT(year FROM study_year) = EXTRACT(year FROM CURRENT_DATE)))
+
+
+-- QUERY 4
+ GroupAggregate  (cost=4.54..4.59 rows=2 width=29)
+   Group Key: employee.employment_id, person.first_name, person.last_name, course_instance.study_period
+   ->  Sort  (cost=4.54..4.55 rows=2 width=21)
+         Sort Key: employee.employment_id, person.first_name, person.last_name, course_instance.study_period
+         ->  Nested Loop  (cost=1.18..4.53 rows=2 width=21)
+               Join Filter: (person.id = employee.person_id)
+               ->  Nested Loop  (cost=1.18..3.43 rows=2 width=12)
+                     Join Filter: (allocations.employee_id = employee.id)
+                     ->  Hash Join  (cost=1.18..2.32 rows=2 width=7)
+                           Hash Cond: ((allocations.instance_id)::text = (course_instance.instance_id)::text)
+                           ->  Seq Scan on allocations  (cost=0.00..1.10 rows=10 width=18)
+                           ->  Hash  (cost=1.16..1.16 rows=1 width=17)
+                                 ->  Seq Scan on course_instance  (cost=0.00..1.16 rows=1 width=17)
+                                       Filter: ((EXTRACT(year FROM study_year) = EXTRACT(year FROM CURRENT_DATE)) AND ((study_period)::text ~ ((EXTRACT(quarter FROM CURRENT_DATE))::character varying)::text))
+                     ->  Materialize  (cost=0.00..1.04 rows=3 width=13)
+                           ->  Seq Scan on employee  (cost=0.00..1.03 rows=3 width=13)
+               ->  Materialize  (cost=0.00..1.04 rows=3 width=17)
+                     ->  Seq Scan on person  (cost=0.00..1.03 rows=3 width=17)
+
