@@ -1,5 +1,6 @@
 -- VIEW FOR QUERY 1
 DROP VIEW v_course_hours;
+
 CREATE VIEW v_course_hours AS
 SELECT course_instance.instance_id, course_code, hp, study_period, num_students,study_year,
 COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lecture' ), 0) as Lecture_Hours,
@@ -19,7 +20,13 @@ GROUP BY course_instance.instance_id,
 study_period, 
 num_students;
 
+
 -- QUERY 1
+
+CREATE INDEX idx_course_instance_year 
+
+ON course_instance(EXTRACT(YEAR FROM study_year));
+
 SELECT instance_id, course_code, hp, study_period, num_students, Lecture_Hours,Tutorial_Hours,Lab_Hours,Seminar_Hours, exam,admin, Other, Total
 FROM v_course_hours
 WHERE EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
@@ -73,52 +80,106 @@ CREATE INDEX idx_teacher_study_period ON v_teaching_hours( EXTRACT(YEAR FROM stu
 FROM v_teaching_hours
 WHERE course_code = 'CS101' AND EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
 
--- QUERY 4
-SELECT employment_id, first_name, last_name, study_period,
-COUNT (*) as allocations
+-- VIEW FOR QUERY  5 
+DROP MATERIALIZED VIEW v_allocated_courses;
+CREATE MATERIALIZED VIEW v_allocated_courses AS
+SELECT employment_id, first_name,  last_name,  study_period, study_year, COUNT(*) as num_allocations
 FROM allocations INNER JOIN employee ON allocations.employee_id = employee.id
 INNER JOIN person ON person.id = employee.person_id
 INNER JOIN course_instance ON allocations.instance_id = course_instance.instance_id
-WHERE EXTRACT(YEAR FROM course_instance.study_year) = EXTRACT(YEAR FROM CURRENT_DATE) 
-AND course_instance.study_period ~ CAST(EXTRACT(QUARTER FROM CURRENT_DATE) AS VARCHAR)
 GROUP BY 
-employment_id, 
-first_name,
+ employment_id, 
+ first_name,
 last_name,
-study_period;
+study_period,
+study_year;
 
+-- QUERY 5
+DROP INDEX IF EXISTS idx_allocated_courses_study_year;
+CREATE INDEX idx_allocated_courses_study_year 
+ON v_allocated_courses(EXTRACT(YEAR FROM study_year), study_period);
+
+SELECT 
+    employment_id, 
+    first_name, 
+    last_name, 
+    study_period,
+    num_allocations
+FROM v_allocated_courses
+WHERE EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE)
+  AND study_period ~ CAST(EXTRACT(QUARTER FROM CURRENT_DATE) AS VARCHAR)
+  AND num_allocations > 0;
+
+
+-- QUERY 4
 -- Only for the mandatory part
 -- Course instances with total planned hours vs total allocated hours variance >15% 
-WITH planned AS (
-      -- Sums the total planned hours for each course instance
-      SELECT
-            instance_id,
-            SUM(total) AS planned_hours -- Gets total planned hours from the view
-      FROM v_course_hours 
-      GROUP BY instance_id
-),
-allocated AS (
-      SELECT
-            instance_id,
-            SUM(total) as allocated_hours -- Gets the total allocated hours from the view 
-      FROM v_teaching_hours
-      GROUP BY instance_id
-)
+-- WITH is a temporary table
+-- WITH planned AS (
+--       -- Sums the total planned hours for each course instance
+--       SELECT
+--             instance_id,
+--             SUM(total) AS planned_hours -- Gets total planned hours from the view
+--       FROM v_course_hours 
+--       GROUP BY instance_id
+-- ),
+-- allocated AS (
+--       SELECT
+--             instance_id,
+--             SUM(total) AS allocated_hours -- Gets the total allocated hours from the view 
+--       FROM v_teaching_hours
+--       GROUP BY instance_id
+-- )
+
+-- SELECT
+--       planned.instance_id, 
+--       planned.planned_hours,
+--       -- COALESCE makes it zero instead of null
+--       COALESCE(allocated.allocated_hours, 0) AS allocated_hours, 
+--       ROUND(
+--             CAST(
+--                   ABS(COALESCE(allocated.allocated_hours, 0) - planned.planned_hours)
+--                   / NULLIF(planned.planned_hours, 0) * 100 -- Division by null gives null
+--             AS numeric), 
+--             2
+--       ) AS variance_percentage
+-- FROM planned    
+-- LEFT JOIN allocated on planned.instance_id = allocated.instance_id
+-- WHERE
+--       ABS(COALESCE(allocated.allocated_hours, 0) - planned.planned_hours)
+--       / NULLIF(planned.planned_hours, 0) > 0.15 -- Division by null gives null
+-- ORDER BY variance_percentage DESC;
+
+-- with subquery instead
+
 
 SELECT
-      p.instance_id,
-      p.planned_hours,
-      COALESCE(a.allocated_hours, 0) as allocated_hours,
-      ROUND(
-            CAST(
-                  ABS(COALESCE(a.allocated_hours, 0) - p.planned_hours)
-                  / NULLIF(p.planned_hours, 0) * 100 
-            AS numeric), 
-            2
-      ) AS variance_percentage
-FROM planned p 
-LEFT JOIN allocated a on p.instance_id = a.instance_id
+    planned.instance_id, 
+    planned.planned_hours,
+    COALESCE(allocated.allocated_hours, 0) AS allocated_hours, 
+    ROUND(
+        CAST(
+            ABS(COALESCE(allocated.allocated_hours, 0) - planned.planned_hours)
+            / NULLIF(planned.planned_hours, 0) * 100
+            AS numeric
+        ), 
+        2
+    ) AS variance_percentage
+FROM (
+    SELECT
+        instance_id,
+        SUM(total) AS planned_hours
+    FROM v_course_hours 
+    GROUP BY instance_id
+) AS planned    
+LEFT JOIN (
+    SELECT
+        instance_id,
+        SUM(total) AS allocated_hours
+    FROM v_teaching_hours
+    GROUP BY instance_id
+) AS allocated ON planned.instance_id = allocated.instance_id
 WHERE
-      ABS(COALESCE(a.allocated_hours, 0) - p.planned_hours)
-      / NULLIF(p.planned_hours, 0) > 0.15
+    ABS(COALESCE(allocated.allocated_hours, 0) - planned.planned_hours)
+    / NULLIF(planned.planned_hours, 0) > 0.15
 ORDER BY variance_percentage DESC;

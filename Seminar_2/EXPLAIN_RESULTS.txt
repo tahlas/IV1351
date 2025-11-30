@@ -19,7 +19,25 @@
                      ->  Hash  (cost=1.06..1.06 rows=6 width=14)
                            ->  Seq Scan on teaching_activity  (cost=0.00..1.06 rows=6 width=14)
                            
-                        
+    -- AFTER OPTIMIZATION (non-materialized view and index on study_year )                 
+ Subquery Scan on v_course_hours  (cost=4.69..5.19 rows=3 width=119)
+   ->  GroupAggregate  (cost=4.69..5.16 rows=3 width=127)
+         Group Key: course_instance.instance_id, course_layout.course_code, course_layout.hp
+         ->  Sort  (cost=4.69..4.70 rows=4 width=45)
+               Sort Key: course_instance.instance_id, course_layout.course_code, course_layout.hp
+               ->  Hash Join  (cost=3.32..4.65 rows=4 width=45)
+                     Hash Cond: (planned_activity.teaching_activity_id = teaching_activity.id)
+                     ->  Hash Join  (cost=2.18..3.50 rows=4 width=39)
+                           Hash Cond: ((planned_activity.instance_id)::text = (course_instance.instance_id)::text)
+                           ->  Seq Scan on planned_activity  (cost=0.00..1.20 rows=20 width=22)
+                           ->  Hash  (cost=2.17..2.17 rows=1 width=31)
+                                 ->  Nested Loop  (cost=0.00..2.17 rows=1 width=31)
+                                       Join Filter: (course_layout.id = course_instance.course_layout_id)
+                                       ->  Seq Scan on course_instance  (cost=0.00..1.10 rows=1 width=25)
+                                             Filter: (EXTRACT(year FROM study_year) = EXTRACT(year FROM CURRENT_DATE))
+                                       ->  Seq Scan on course_layout  (cost=0.00..1.03 rows=3 width=14)
+                     ->  Hash  (cost=1.06..1.06 rows=6 width=14)
+                           ->  Seq Scan on teaching_activity  (cost=0.00..1.06 rows=6 width=14)
 
 
 
@@ -108,24 +126,61 @@ Subquery Scan on v_teaching_hours  (cost=9.44..9.79 rows=3 width=113)
                      Seq Scan on v_teaching_hours  (cost=0.00..1.27 rows=1 width=115)
    Filter: (((((first_name)::text || ' '::text) || (last_name)::text) = 'Bob Smith'::text) AND (EXTRACT(year FROM study_year) = EXTRACT(year FROM CURRENT_DATE)))
 
-
 -- QUERY 4
- GroupAggregate  (cost=4.54..4.59 rows=2 width=29)
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=17.13..17.14 rows=5 width=62)
+   Sort Key: (round((((abs((COALESCE(allocated.allocated_hours, '0'::double precision) - (sum((COALESCE(((sum(((planned_activity.planned_hours)::double precision * teaching_activity.factor)) + (('32'::numeric + (0.725 * (course_instance.num_students)::numeric)))::double precision) + ((('2'::double precision * course_layout.hp) + '28'::double precision) + ((0.2 * (course_instance.num_students)::numeric))::double precision)), '0'::double precision)))))) / NULLIF((sum((COALESCE(((sum(((planned_activity.planned_hours)::double precision * teaching_activity.factor)) + (('32'::numeric + (0.725 * (course_instance.num_students)::numeric)))::double precision) + ((('2'::double precision * course_layout.hp) + '28'::double precision) + ((0.2 * (course_instance.num_students)::numeric))::double precision)), '0'::double precision)))), '0'::double precision)) * '100'::double precision))::numeric, 2)) DESC
+   ->  Hash Left Join  (cost=16.77..17.07 rows=5 width=62)
+         Hash Cond: ((course_instance.instance_id)::text = (allocated.instance_id)::text)
+         Filter: ((abs((COALESCE(allocated.allocated_hours, '0'::double precision) - (sum((COALESCE(((sum(((planned_activity.planned_hours)::double precision * teaching_activity.factor)) + (('32'::numeric + (0.725 * (course_instance.num_students)::numeric)))::double precision) + ((('2'::double precision * course_layout.hp) + '28'::double precision) + ((0.2 * (course_instance.num_students)::numeric))::double precision)), '0'::double precision)))))) / NULLIF((sum((COALESCE(((sum(((planned_activity.planned_hours)::double precision * teaching_activity.factor)) + (('32'::numeric + (0.725 * (course_instance.num_students)::numeric)))::double precision) + ((('2'::double precision * course_layout.hp) + '28'::double precision) + ((0.2 * (course_instance.num_students)::numeric))::double precision)), '0'::double precision)))), '0'::double precision)) > '0.15'::double precision)
+         ->  HashAggregate  (cost=5.95..6.10 rows=15 width=22)
+               Group Key: course_instance.instance_id
+               ->  HashAggregate  (cost=5.13..5.73 rows=15 width=127)
+                     Group Key: course_instance.instance_id, course_layout.course_code, course_layout.hp
+                     ->  Hash Join  (cost=3.32..4.83 rows=20 width=39)
+                           Hash Cond: (planned_activity.teaching_activity_id = teaching_activity.id)
+                           ->  Hash Join  (cost=2.18..3.61 rows=20 width=39)
+                                 Hash Cond: (course_instance.course_layout_id = course_layout.id)
+                                 ->  Hash Join  (cost=1.11..2.41 rows=20 width=33)
+                                       Hash Cond: ((planned_activity.instance_id)::text = (course_instance.instance_id)::text)
+                                       ->  Seq Scan on planned_activity  (cost=0.00..1.20 rows=20 width=22)
+                                       ->  Hash  (cost=1.05..1.05 rows=5 width=25)
+                                             ->  Seq Scan on course_instance  (cost=0.00..1.05 rows=5 width=25)
+                                 ->  Hash  (cost=1.03..1.03 rows=3 width=14)
+                                       ->  Seq Scan on course_layout  (cost=0.00..1.03 rows=3 width=14)
+                           ->  Hash  (cost=1.06..1.06 rows=6 width=8)
+                                 ->  Seq Scan on teaching_activity  (cost=0.00..1.06 rows=6 width=8)
+         ->  Hash  (cost=10.66..10.66 rows=13 width=22)
+               ->  Subquery Scan on allocated  (cost=10.40..10.66 rows=13 width=22)
+                     ->  HashAggregate  (cost=10.40..10.53 rows=13 width=22)
+                           Group Key: course_instance_1.instance_id
+                           ->  HashAggregate  (cost=10.07..10.20 rows=13 width=124)
+                                 Group Key: course_layout_1.course_code, course_instance_1.instance_id, course_layout_1.hp, person.first_name, person.last_name, job_title.job_title
+:
+
+-- QUERY 5
+  -- BEFORE OPTIMIZATION
+ HashAggregate  (cost=4.56..4.60 rows=4 width=29)
    Group Key: employee.employment_id, person.first_name, person.last_name, course_instance.study_period
-   ->  Sort  (cost=4.54..4.55 rows=2 width=21)
-         Sort Key: employee.employment_id, person.first_name, person.last_name, course_instance.study_period
-         ->  Nested Loop  (cost=1.18..4.53 rows=2 width=21)
-               Join Filter: (person.id = employee.person_id)
-               ->  Nested Loop  (cost=1.18..3.43 rows=2 width=12)
-                     Join Filter: (allocations.employee_id = employee.id)
-                     ->  Hash Join  (cost=1.18..2.32 rows=2 width=7)
-                           Hash Cond: ((allocations.instance_id)::text = (course_instance.instance_id)::text)
-                           ->  Seq Scan on allocations  (cost=0.00..1.10 rows=10 width=18)
-                           ->  Hash  (cost=1.16..1.16 rows=1 width=17)
-                                 ->  Seq Scan on course_instance  (cost=0.00..1.16 rows=1 width=17)
-                                       Filter: ((EXTRACT(year FROM study_year) = EXTRACT(year FROM CURRENT_DATE)) AND ((study_period)::text ~ ((EXTRACT(quarter FROM CURRENT_DATE))::character varying)::text))
-                     ->  Materialize  (cost=0.00..1.04 rows=3 width=13)
-                           ->  Seq Scan on employee  (cost=0.00..1.03 rows=3 width=13)
-               ->  Materialize  (cost=0.00..1.04 rows=3 width=17)
-                     ->  Seq Scan on person  (cost=0.00..1.03 rows=3 width=17)
+   ->  Hash Join  (cost=3.32..4.51 rows=4 width=21)
+         Hash Cond: (employee.person_id = person.id)
+         ->  Hash Join  (cost=2.26..3.43 rows=4 width=12)
+               Hash Cond: (allocations.employee_id = employee.id)
+               ->  Hash Join  (cost=1.19..2.34 rows=4 width=7)
+                     Hash Cond: ((allocations.instance_id)::text = (course_instance.instance_id)::text)
+                     ->  Seq Scan on allocations  (cost=0.00..1.10 rows=10 width=18)
+                     ->  Hash  (cost=1.16..1.16 rows=2 width=17)
+                           ->  Seq Scan on course_instance  (cost=0.00..1.16 rows=2 width=17)
+                                 Filter: ((EXTRACT(year FROM study_year) = EXTRACT(year FROM CURRENT_DATE)) AND ((study_period)::text ~ ((EXTRACT(quarter FROM CURRENT_DATE))::character varying)::text))
+               ->  Hash  (cost=1.03..1.03 rows=3 width=13)
+                     ->  Seq Scan on employee  (cost=0.00..1.03 rows=3 width=13)
+         ->  Hash  (cost=1.03..1.03 rows=3 width=17)
+               ->  Seq Scan on person  (cost=0.00..1.03 rows=3 width=17)
+               
+-- AFTER OPTIMIZATION (Materialized view and index on study_year and (study_year, study_period))   
+Seq Scan on v_allocated_courses  (cost=0.00..1.35 rows=1 width=1594)
+   Filter: ((num_allocations > 0) AND (EXTRACT(year FROM study_year) = EXTRACT(year FROM CURRENT_DATE)) AND ((study_period)::text ~ ((EXTRACT(quarter FROM CURRENT_DATE))::character varying)::text))
+
+
+
 

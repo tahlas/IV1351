@@ -77,3 +77,4 @@ employment_id,
 first_name,
 last_name,
 study_period;
+HAVING COUNT(*) > 0; 
