@@ -1,4 +1,4 @@
--- VIEW FOR QUERY 1
+-- VIEW FOR QUERY 1 (AND 4)
 DROP VIEW v_course_hours;
 
 CREATE VIEW v_course_hours AS
@@ -31,7 +31,7 @@ SELECT instance_id, course_code, hp, study_period, num_students, Lecture_Hours,T
 FROM v_course_hours
 WHERE EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
 
--- VIEW FOR QUERY 2 AND 3
+-- VIEW FOR QUERY 2 AND 3 (AND 4)
 DROP  MATERIALIZED  VIEW  v_teaching_hours;
 CREATE MATERIALIZED  VIEW v_teaching_hours AS
 SELECT course_code, course_instance.instance_id, hp, study_period, first_name, last_name, job_title, study_year, 
@@ -113,46 +113,6 @@ WHERE EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE)
 
 -- QUERY 4
 -- Only for the mandatory part
--- Course instances with total planned hours vs total allocated hours variance >15% 
--- WITH is a temporary table
--- WITH planned AS (
---       -- Sums the total planned hours for each course instance
---       SELECT
---             instance_id,
---             SUM(total) AS planned_hours -- Gets total planned hours from the view
---       FROM v_course_hours 
---       GROUP BY instance_id
--- ),
--- allocated AS (
---       SELECT
---             instance_id,
---             SUM(total) AS allocated_hours -- Gets the total allocated hours from the view 
---       FROM v_teaching_hours
---       GROUP BY instance_id
--- )
-
--- SELECT
---       planned.instance_id, 
---       planned.planned_hours,
---       -- COALESCE makes it zero instead of null
---       COALESCE(allocated.allocated_hours, 0) AS allocated_hours, 
---       ROUND(
---             CAST(
---                   ABS(COALESCE(allocated.allocated_hours, 0) - planned.planned_hours)
---                   / NULLIF(planned.planned_hours, 0) * 100 -- Division by null gives null
---             AS numeric), 
---             2
---       ) AS variance_percentage
--- FROM planned    
--- LEFT JOIN allocated on planned.instance_id = allocated.instance_id
--- WHERE
---       ABS(COALESCE(allocated.allocated_hours, 0) - planned.planned_hours)
---       / NULLIF(planned.planned_hours, 0) > 0.15 -- Division by null gives null
--- ORDER BY variance_percentage DESC;
-
--- with subquery instead
-
-
 SELECT
     planned.instance_id, 
     planned.planned_hours,
