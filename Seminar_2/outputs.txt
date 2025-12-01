@@ -1,0 +1,159 @@
+--Query 1
+
+-[ RECORD 1 ]--+--------------
+instance_id    | CS301-2025-P3
+course_code    | CS301
+hp             | 7.5
+study_period   | P3
+num_students   | 35
+lecture_hours  | 20
+tutorial_hours | 0
+lab_hours      | 0
+seminar_hours  | 24
+exam           | 57.375
+admin          | 50
+other          | 107
+total          | 258.375
+-[ RECORD 2 ]--+--------------
+instance_id    | CS201-2025-P2
+course_code    | CS201
+hp             | 7.5
+study_period   | P2
+num_students   | 30
+lecture_hours  | 24
+tutorial_hours | 0
+lab_hours      | 54
+seminar_hours  | 0
+exam           | 53.750
+admin          | 49
+other          | 103
+total          | 283.75
+-[ RECORD 3 ]--+--------------
+instance_id    | CS101-2025-P4
+course_code    | CS101
+hp             | 7.5
+study_period   | P4
+num_students   | 50
+lecture_hours  | 20
+tutorial_hours | 0
+lab_hours      | 0
+
+
+--QUERY 2
+-[ RECORD 1 ]--+-------------------
+course_code    | CS101
+instance_id    | CS101-2025-P4
+hp             | 7.5
+first_name     | Bob
+last_name      | Smith
+job_title      | Lecturer
+lecture_hours  | 0
+tutorial_hours | 0
+lab_hours      | 0
+seminar_hours  | 20
+exam_hours     | 0
+admin_hours    | 53
+other          | 0
+total          | 73
+-[ RECORD 2 ]--+-------------------
+course_code    | CS101
+instance_id    | CS101-2025-P4
+hp             | 7.5
+first_name     | Alice
+last_name      | Johnson
+job_title      | Professor
+lecture_hours  | 20
+tutorial_hours | 0
+lab_hours      | 0
+seminar_hours  | 0
+exam_hours     | 68
+admin_hours    | 0
+other          | 0
+total          | 88
+-[ RECORD 3 ]--+-------------------
+course_code    | CS101
+instance_id    | CS101-2025-P1
+hp             | 7.5
+first_name     | Bob
+last_name      | Smith
+job_title      | Lecturer
+
+--QUERY 3
+-[ RECORD 1 ]--+--------------
+course_code    | CS201
+instance_id    | CS201-2025-P2
+hp             | 7.5
+first_name     | Bob
+last_name      | Smith
+job_title      | Lecturer
+lecture_hours  | 0
+tutorial_hours | 0
+lab_hours      | 54
+seminar_hours  | 0
+exam_hours     | 0
+admin_hours    | 49
+other          | 0
+total          | 103
+-[ RECORD 2 ]--+--------------
+course_code    | CS101
+instance_id    | CS101-2025-P4
+hp             | 7.5
+first_name     | Bob
+last_name      | Smith
+job_title      | Lecturer
+lecture_hours  | 0
+tutorial_hours | 0
+lab_hours      | 0
+seminar_hours  | 20
+exam_hours     | 0
+admin_hours    | 53
+other          | 0
+total          | 73
+-[ RECORD 3 ]--+--------------
+course_code    | CS101
+instance_id    | CS101-2025-P1
+hp             | 7.5
+first_name     | Bob
+last_name      | Smith
+job_title      | Lecturer
+
+--QUERY 4
+-[ RECORD 1 ]-------+--------------
+instance_id         | CS101-2025-P4
+planned_hours       | 282.25
+allocated_hours     | 161
+variance_percentage | 42.96
+-[ RECORD 2 ]-------+--------------
+instance_id         | CS201-2024-P2
+planned_hours       | 241.75
+allocated_hours     | 139
+variance_percentage | 42.50
+-[ RECORD 3 ]-------+--------------
+instance_id         | CS301-2025-P3
+planned_hours       | 258.375
+allocated_hours     | 151
+variance_percentage | 41.56
+-[ RECORD 4 ]-------+--------------
+instance_id         | CS101-2025-P1
+planned_hours       | 318.625
+allocated_hours     | 202
+variance_percentage | 36.60
+-[ RECORD 5 ]-------+--------------
+instance_id         | CS201-2025-P2
+planned_hours       | 283.75
+allocated_hours     | 181
+variance_percentage | 36.21
+
+--QUERY 5
+-[ RECORD 1 ]---+--------
+employment_id   | E002
+first_name      | Bob
+last_name       | Smith
+study_period    | P4
+num_allocations | 1
+-[ RECORD 2 ]---+--------
+employment_id   | E001
+first_name      | Alice
+last_name       | Johnson
+study_period    | P4
+num_allocations | 1
