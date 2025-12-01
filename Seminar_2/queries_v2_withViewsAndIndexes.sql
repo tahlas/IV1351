@@ -113,7 +113,7 @@ GROUP BY
 last_name,
 study_period,
 study_year;
-
+  
 -- QUERY 5
 DROP INDEX IF EXISTS idx_allocated_courses_study_year;
 CREATE INDEX idx_allocated_courses_study_year 

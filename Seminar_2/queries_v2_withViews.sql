@@ -1,4 +1,4 @@
--- VIEW FOR QUERY 1
+-- VIEW FOR QUERY 1 
 DROP VIEW  v_course_hours;
 CREATE VIEW v_course_hours AS
 SELECT course_instance.instance_id, course_code, hp, study_period, num_students,study_year,
