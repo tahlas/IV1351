@@ -62,8 +62,7 @@ SELECT course_code, course_instance.instance_id, hp, study_period, first_name, l
             )
     ),
     0
-) as Other,
-    COALESCE(SUM(planned_hours * factor), 0 ) as Total
+    ) as Other, COALESCE(SUM(planned_hours * factor), 0 ) as Total
 FROM
     course_instance
     INNER JOIN course_layout ON course_instance.course_layout_id = course_layout.id
