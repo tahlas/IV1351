@@ -2,34 +2,100 @@
 DROP VIEW v_course_hours;
 
 CREATE VIEW v_course_hours AS
-SELECT course_instance.instance_id, course_code, hp, study_period, num_students,study_year,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lecture' ), 0) as Lecture_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Tutorial'), 0) as Tutorial_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lab'     ), 0) as Lab_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Seminar' ), 0) as Seminar_Hours,
-(32+0.725*num_students) AS exam,
-(2*hp+28+0.2*num_students) AS admin,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name NOT IN ('Lecture', 'Tutorial', 'Lab', 'Seminar')),0) as Other,
-COALESCE(SUM(planned_hours * factor ) +(32+0.725*num_students) +  (2*hp+28+0.2*num_students)  ,0) as Total
-FROM course_instance 
-INNER JOIN course_layout ON course_instance.course_layout_id = course_layout.id 
-INNER JOIN planned_activity ON planned_activity.instance_id = course_instance.instance_id 
-INNER JOIN teaching_activity ON planned_activity.teaching_activity_id = teaching_activity.id
-GROUP BY course_instance.instance_id,
- course_code, hp,
-study_period, 
-num_students;
+SELECT
+    course_instance.instance_id,
+    course_code,
+    hp,
+    study_period,
+    num_students,
+    study_year,
+    COALESCE(
+        SUM(planned_hours * factor) FILTER (
+            WHERE
+                activity_name = 'Lecture'
+        ),
+        0
+    ) as Lecture_Hours,
+    COALESCE(
+        SUM(planned_hours * factor) FILTER (
+            WHERE
+                activity_name = 'Tutorial'
+        ),
+        0
+    ) as Tutorial_Hours,
+    COALESCE(
+        SUM(planned_hours * factor) FILTER (
+            WHERE
+                activity_name = 'Lab'
+        ),
+        0
+    ) as Lab_Hours,
+    COALESCE(
+        SUM(planned_hours * factor) FILTER (
+            WHERE
+                activity_name = 'Seminar'
+        ),
+        0
+    ) as Seminar_Hours,
+    (32 + 0.725 * num_students) AS exam,
+    (2 * hp + 28 + 0.2 * num_students) AS admin,
+    COALESCE(
+        SUM(planned_hours * factor) FILTER (
+            WHERE
+                activity_name NOT IN(
+                    'Lecture',
+                    'Tutorial',
+                    'Lab',
+                    'Seminar'
+                )
+        ),
+        0
+    ) as Other,
+    COALESCE(
+        SUM(planned_hours * factor) + (32 + 0.725 * num_students) + (
+            2 * hp + 28 + 0.2 * num_students
+        ),
+        0
+    ) as Total
+FROM
+    course_instance
+    INNER JOIN course_layout ON course_instance.course_layout_id = course_layout.id
+    INNER JOIN planned_activity ON planned_activity.instance_id = course_instance.instance_id
+    INNER JOIN teaching_activity ON planned_activity.teaching_activity_id = teaching_activity.id
+GROUP BY
+    course_instance.instance_id,
+    course_code,
+    hp,
+    study_period,
+    num_students;
 
 
 -- QUERY 1
 
-CREATE INDEX idx_course_instance_year 
+CREATE INDEX idx_course_instance_year ON course_instance (
+    EXTRACT(
+        YEAR
+        FROM study_year
+    )
+);
 
-ON course_instance(EXTRACT(YEAR FROM study_year));
-
-SELECT instance_id, course_code, hp, study_period, num_students, Lecture_Hours,Tutorial_Hours,Lab_Hours,Seminar_Hours, exam,admin, Other, Total
+SELECT
+    instance_id,
+    course_code,
+    hp,
+    study_period,
+    num_students,
+    Lecture_Hours,
+    Tutorial_Hours,
+    Lab_Hours,
+    Seminar_Hours,
+    exam,
+    admin,
+    Other,
+    Total
 FROM v_course_hours
-WHERE EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
+WHERE
+    EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
 
 -- VIEW FOR QUERY 2 AND 3 (AND 4)
 DROP  MATERIALIZED  VIEW  v_teaching_hours;
