@@ -95,10 +95,11 @@ WHERE course_code = 'CS101' AND EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FRO
 
 DROP INDEX  idx_teacher_study_period;
 CREATE INDEX idx_teacher_study_period ON v_teaching_hours( EXTRACT(YEAR FROM study_year) ,   (first_name || ' ' || last_name)) ;
-
 SELECT course_code, instance_id , hp, first_name, last_name, job_title, Lecture_Hours, Tutorial_Hours,Lab_Hours,Seminar_Hours,Exam_Hours,Admin_Hours, Other,Total
 FROM v_teaching_hours
-WHERE course_code = 'CS101' AND EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
+WHERE EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE) 
+AND (first_name || ' ' || last_name) = 'Bob Smith';
+
 
 -- VIEW FOR QUERY  5 
 DROP MATERIALIZED VIEW v_allocated_courses;

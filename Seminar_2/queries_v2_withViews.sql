@@ -62,7 +62,7 @@ WHERE course_code = 'CS101' AND EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FRO
 SELECT course_code, instance_id , hp, study_period, first_name, last_name, job_title, Lecture_Hours, Tutorial_Hours,Lab_Hours,Seminar_Hours,Exam_Hours,Admin_Hours, Other,Total
 FROM v_teaching_hours
 WHERE EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE) 
-      AND CONCAT(first_name, ' ', last_name) = 'Bob Smith';
+   AND (first_name || ' ' || last_name) = 'Bob Smith';
 
 -- QUERY 4
 SELECT employment_id, first_name, last_name, study_period,
