@@ -1,7 +1,7 @@
 -- VIEW FOR QUERY 1 (AND 4)
-DROP VIEW v_course_hours;
+DROP MATERIALIZED  VIEW v_course_hours;
 
-CREATE VIEW v_course_hours AS
+CREATE MATERIALIZED  VIEW v_course_hours AS
 SELECT
     course_instance.instance_id,
     course_code,
@@ -9,54 +9,14 @@ SELECT
     study_period,
     num_students,
     study_year,
-    COALESCE(
-        SUM(planned_hours * factor) FILTER (
-            WHERE
-                activity_name = 'Lecture'
-        ),
-        0
-    ) as Lecture_Hours,
-    COALESCE(
-        SUM(planned_hours * factor) FILTER (
-            WHERE
-                activity_name = 'Tutorial'
-        ),
-        0
-    ) as Tutorial_Hours,
-    COALESCE(
-        SUM(planned_hours * factor) FILTER (
-            WHERE
-                activity_name = 'Lab'
-        ),
-        0
-    ) as Lab_Hours,
-    COALESCE(
-        SUM(planned_hours * factor) FILTER (
-            WHERE
-                activity_name = 'Seminar'
-        ),
-        0
-    ) as Seminar_Hours,
+    COALESCE( SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lecture' ),0  ) as Lecture_Hours,
+    COALESCE(SUM(planned_hours * factor) FILTER ( WHERE activity_name = 'Tutorial' ),0) as Tutorial_Hours,
+    COALESCE(SUM(planned_hours * factor) FILTER ( WHERE activity_name = 'Lab' ),0 ) as Lab_Hours,
+    COALESCE( SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Seminar' ),0 ) as Seminar_Hours,
     (32 + 0.725 * num_students) AS exam,
     (2 * hp + 28 + 0.2 * num_students) AS admin,
-    COALESCE(
-        SUM(planned_hours * factor) FILTER (
-            WHERE
-                activity_name NOT IN(
-                    'Lecture',
-                    'Tutorial',
-                    'Lab',
-                    'Seminar'
-                )
-        ),
-        0
-    ) as Other,
-    COALESCE(
-        SUM(planned_hours * factor) + (32 + 0.725 * num_students) + (
-            2 * hp + 28 + 0.2 * num_students
-        ),
-        0
-    ) as Total
+    COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name NOT IN( 'Lecture',  'Tutorial',  'Lab', 'Seminar')  ), 0  ) as Other,
+    COALESCE(SUM(planned_hours * factor) + (32 + 0.725 * num_students) + ( 2 * hp + 28 + 0.2 * num_students), 0 ) as Total
 FROM
     course_instance
     INNER JOIN course_layout ON course_instance.course_layout_id = course_layout.id
@@ -71,31 +31,13 @@ GROUP BY
 
 
 -- QUERY 1
+ 
+DROP INDEX  idx_course_instance_year; 
+CREATE INDEX idx_course_instance_year ON course_instance (EXTRACT(YEAR FROM study_year));
 
-CREATE INDEX idx_course_instance_year ON course_instance (
-    EXTRACT(
-        YEAR
-        FROM study_year
-    )
-);
-
-SELECT
-    instance_id,
-    course_code,
-    hp,
-    study_period,
-    num_students,
-    Lecture_Hours,
-    Tutorial_Hours,
-    Lab_Hours,
-    Seminar_Hours,
-    exam,
-    admin,
-    Other,
-    Total
+SELECT instance_id, course_code, hp,  study_period, num_students, Lecture_Hours, Tutorial_Hours,  Lab_Hours,Seminar_Hours,exam, admin, Other, Total
 FROM v_course_hours
-WHERE
-    EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
+WHERE  EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
 
 -- VIEW FOR QUERY 2 AND 3 (AND 4)
 DROP  MATERIALIZED  VIEW  v_teaching_hours;
@@ -129,7 +71,6 @@ job_title;
 -- QUERY 2
 
 DROP INDEX  idx_course_study_year;
-
 CREATE INDEX idx_course_study_year ON v_teaching_hours(course_code, EXTRACT(YEAR FROM study_year) ) ;
 
 SELECT course_code, instance_id , hp, first_name, last_name, job_title, Lecture_Hours, Tutorial_Hours,Lab_Hours,Seminar_Hours,Exam_Hours,Admin_Hours, Other,Total
@@ -139,10 +80,9 @@ WHERE course_code = 'CS101' AND EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FRO
 -- QUERY 3
 
 DROP INDEX  idx_teacher_study_period;
-
 CREATE INDEX idx_teacher_study_period ON v_teaching_hours( EXTRACT(YEAR FROM study_year) ,   (first_name || ' ' || last_name)) ;
 
- SELECT course_code, instance_id , hp, first_name, last_name, job_title, Lecture_Hours, Tutorial_Hours,Lab_Hours,Seminar_Hours,Exam_Hours,Admin_Hours, Other,Total
+SELECT course_code, instance_id , hp, first_name, last_name, job_title, Lecture_Hours, Tutorial_Hours,Lab_Hours,Seminar_Hours,Exam_Hours,Admin_Hours, Other,Total
 FROM v_teaching_hours
 WHERE course_code = 'CS101' AND EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
 
@@ -165,12 +105,7 @@ DROP INDEX IF EXISTS idx_allocated_courses_study_year;
 CREATE INDEX idx_allocated_courses_study_year 
 ON v_allocated_courses(EXTRACT(YEAR FROM study_year), study_period);
 
-SELECT 
-    employment_id, 
-    first_name, 
-    last_name, 
-    study_period,
-    num_allocations
+SELECT employment_id,  first_name, last_name, study_period, num_allocations
 FROM v_allocated_courses
 WHERE EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE)
   AND study_period ~ CAST(EXTRACT(QUARTER FROM CURRENT_DATE) AS VARCHAR)
