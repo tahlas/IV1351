@@ -9,10 +9,10 @@ SELECT
     study_period,
     num_students,
     study_year,
-    COALESCE( SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lecture' ),0  ) as Lecture_Hours,
-    COALESCE(SUM(planned_hours * factor) FILTER ( WHERE activity_name = 'Tutorial' ),0) as Tutorial_Hours,
-    COALESCE(SUM(planned_hours * factor) FILTER ( WHERE activity_name = 'Lab' ),0 ) as Lab_Hours,
-    COALESCE( SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Seminar' ),0 ) as Seminar_Hours,
+    COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lecture' ),0 ) as Lecture_Hours,
+    COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Tutorial'),0 ) as Tutorial_Hours,
+    COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lab'     ),0 ) as Lab_Hours,
+    COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Seminar' ),0 ) as Seminar_Hours,
     (32 + 0.725 * num_students) AS exam,
     (2 * hp + 28 + 0.2 * num_students) AS admin,
     COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name NOT IN( 'Lecture',  'Tutorial',  'Lab', 'Seminar')  ), 0  ) as Other,
@@ -43,30 +43,45 @@ WHERE  EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE);
 DROP  MATERIALIZED  VIEW  v_teaching_hours;
 CREATE MATERIALIZED  VIEW v_teaching_hours AS
 SELECT course_code, course_instance.instance_id, hp, study_period, first_name, last_name, job_title, study_year, 
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lecture' ), 0) as Lecture_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Tutorial'), 0) as Tutorial_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lab'     ), 0) as Lab_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Seminar' ), 0) as Seminar_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Exam'    ), 0) as Exam_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Admin'   ), 0) as Admin_Hours,
-COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name NOT IN ('Lecture', 'Tutorial', 'Lab', 'Seminar', 'Exam', 'Admin')),0) as Other,
-COALESCE(SUM(planned_hours * factor), 0 ) as Total
-FROM course_instance 
-INNER JOIN course_layout ON course_instance.course_layout_id = course_layout.id 
-INNER JOIN planned_activity ON planned_activity.instance_id = course_instance.instance_id 
-INNER JOIN teaching_activity ON planned_activity.teaching_activity_id = teaching_activity.id
-INNER JOIN employee_planned_activity ON  employee_planned_activity.instance_id = course_instance.instance_id AND employee_planned_activity.teaching_activity_id = planned_activity.teaching_activity_id  /* Important to use the AND here, otherwise every employee gets connected to every activity for the course, instead of their assigned activities */
-INNER JOIN employee ON employee_planned_activity.employee_id = employee.id 
-INNER JOIN person ON employee.person_id = person.id 
-INNER JOIN job_title ON employee.job_title_id = job_title.id 
-GROUP BY 
-course_code,
-course_instance.instance_id,
-hp,
-study_period,
-first_name,
-last_name,
-job_title;
+    COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lecture' ), 0) as Lecture_Hours,
+    COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Tutorial'), 0) as Tutorial_Hours,
+    COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Lab'     ), 0) as Lab_Hours,
+    COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Seminar' ), 0) as Seminar_Hours,
+    COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Exam'    ), 0) as Exam_Hours,
+    COALESCE(SUM(planned_hours * factor) FILTER (WHERE activity_name = 'Admin'   ), 0) as Admin_Hours,
+    COALESCE(
+    SUM(planned_hours * factor) FILTER (
+        WHERE
+            activity_name NOT IN(
+                'Lecture',
+                'Tutorial',
+                'Lab',
+                'Seminar',
+                'Exam',
+                'Admin'
+            )
+    ),
+    0
+) as Other,
+    COALESCE(SUM(planned_hours * factor), 0 ) as Total
+FROM
+    course_instance
+    INNER JOIN course_layout ON course_instance.course_layout_id = course_layout.id
+    INNER JOIN planned_activity ON planned_activity.instance_id = course_instance.instance_id
+    INNER JOIN teaching_activity ON planned_activity.teaching_activity_id = teaching_activity.id
+    INNER JOIN employee_planned_activity ON employee_planned_activity.instance_id = course_instance.instance_id
+    AND employee_planned_activity.teaching_activity_id = planned_activity.teaching_activity_id /* Important to use the AND here, otherwise every employee gets connected to every activity for the course, instead of their assigned activities */
+    INNER JOIN employee ON employee_planned_activity.employee_id = employee.id
+    INNER JOIN person ON employee.person_id = person.id
+    INNER JOIN job_title ON employee.job_title_id = job_title.id
+GROUP BY
+    course_code,
+    course_instance.instance_id,
+    hp,
+    study_period,
+    first_name,
+    last_name,
+    job_title;
 
 -- QUERY 2
 
