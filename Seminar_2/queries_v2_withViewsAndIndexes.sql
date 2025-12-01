@@ -128,7 +128,7 @@ WHERE EXTRACT(YEAR FROM study_year) = EXTRACT(YEAR FROM CURRENT_DATE)
 
 
 -- QUERY 4
--- Only for the mandatory part
+-- Only for the higher grade part
 SELECT
     planned.instance_id, 
     planned.planned_hours,
