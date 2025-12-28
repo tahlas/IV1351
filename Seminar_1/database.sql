@@ -1,20 +1,21 @@
-DROP TABLE IF EXISTS employee_planned_activity;
-DROP TABLE IF EXISTS planned_activity;
-DROP TABLE IF EXISTS employee_skill;
-DROP TABLE IF EXISTS skill;
-DROP TABLE IF EXISTS employee;
-DROP TABLE IF EXISTS job_title;
-DROP TABLE IF EXISTS department;
-DROP TABLE IF EXISTS person;
-DROP TABLE IF EXISTS course_instance;
-DROP TABLE IF EXISTS course_layout;
-DROP TABLE IF EXISTS teaching_activity;
-DROP TABLE IF EXISTS allocations;
-DROP TABLE IF EXISTS salary;
+
+DROP TABLE IF EXISTS employee_planned_activity CASCADE;
+DROP TABLE IF EXISTS planned_activity CASCADE;
+DROP TABLE IF EXISTS employee_skill CASCADE;
+DROP TABLE IF EXISTS skill CASCADE;
+DROP TABLE IF EXISTS employee CASCADE;
+DROP TABLE IF EXISTS job_title CASCADE;
+DROP TABLE IF EXISTS department CASCADE;
+DROP TABLE IF EXISTS person CASCADE;
+DROP TABLE IF EXISTS course_instance CASCADE;
+DROP TABLE IF EXISTS course_layout CASCADE;
+DROP TABLE IF EXISTS teaching_activity CASCADE;
+DROP TABLE IF EXISTS allocations CASCADE;
+DROP TABLE IF EXISTS salary CASCADE;
+DROP TABLE IF EXISTS business_rule CASCADE;
 
 CREATE TABLE person(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
     personal_number VARCHAR(12) UNIQUE NOT NULL,
     first_name VARCHAR(500) NOT NULL,
     last_name VARCHAR(500) NOT NULL,
@@ -26,9 +27,9 @@ CREATE TABLE person(
 
 CREATE TABLE department(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
     department_name VARCHAR(500) UNIQUE NOT NULL,
-    manager VARCHAR(500) NOT NULL
+    manager_employee_id INT, 
+    FOREIGN KEY (manager_employee_id) REFERENCES employee(id)
 );
 
 CREATE TABLE job_title(
@@ -39,12 +40,8 @@ CREATE TABLE job_title(
 
 CREATE TABLE employee(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
     employment_id VARCHAR(500) UNIQUE NOT NULL,
-    salary INT NOT NULL,
-    manager VARCHAR(500),
 
-    /* Primary keys are already unique*/
     department_id INT NOT NULL,
     person_id INT NOT NULL,
     job_title_id INT NOT NULL,
@@ -53,7 +50,6 @@ CREATE TABLE employee(
     FOREIGN KEY (person_id) REFERENCES person(id),
     FOREIGN KEY (job_title_id) REFERENCES job_title(id)
 );
-
 CREATE TABLE skill(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
@@ -119,13 +115,10 @@ CREATE TABLE employee_planned_activity(
 
 CREATE TABLE allocations(
     allocated_hours INT NOT NULL,
-    max_num_allocations INT NOT NULL,
-    num_allocations INT NOT NULL,
-
     employee_id INT NOT NULL,
     instance_id VARCHAR(200) NOT NULL,
 
-    PRIMARY KEY(employee_id, instance_id),
+    PRIMARY KEY (employee_id, instance_id),
     FOREIGN KEY (employee_id) REFERENCES employee(id),
     FOREIGN KEY (instance_id) REFERENCES course_instance(instance_id)
 );
@@ -138,4 +131,9 @@ CREATE TABLE salary(
 
     PRIMARY KEY(salary, employee_id),
     FOREIGN KEY (employee_id) REFERENCES employee(id)
+);
+
+CREATE TABLE business_rule(
+    max_num_allocations INT NOT NULL,
+    PRIMARY KEY(max_num_allocations)
 );
