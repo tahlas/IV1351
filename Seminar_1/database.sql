@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS employee_planned_activity CASCADE;
 DROP TABLE IF EXISTS planned_activity CASCADE;
 DROP TABLE IF EXISTS employee_skill CASCADE;
@@ -25,12 +24,6 @@ CREATE TABLE person(
     city VARCHAR(500) NOT NULL
 );
 
-CREATE TABLE department(
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    department_name VARCHAR(500) UNIQUE NOT NULL,
-    manager_employee_id INT, 
-    FOREIGN KEY (manager_employee_id) REFERENCES employee(id)
-);
 
 CREATE TABLE job_title(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -38,10 +31,16 @@ CREATE TABLE job_title(
     job_title VARCHAR(500) UNIQUE NOT NULL
 );
 
+CREATE TABLE department(
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    department_name VARCHAR(500) UNIQUE NOT NULL,
+    manager_employee_id INT
+);
+
+
 CREATE TABLE employee(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     employment_id VARCHAR(500) UNIQUE NOT NULL,
-
     department_id INT NOT NULL,
     person_id INT NOT NULL,
     job_title_id INT NOT NULL,
@@ -50,6 +49,12 @@ CREATE TABLE employee(
     FOREIGN KEY (person_id) REFERENCES person(id),
     FOREIGN KEY (job_title_id) REFERENCES job_title(id)
 );
+
+ALTER TABLE department 
+ADD CONSTRAINT fk_department_manager 
+FOREIGN KEY (manager_employee_id) REFERENCES employee(id);
+
+
 CREATE TABLE skill(
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
